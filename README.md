@@ -26,13 +26,58 @@ This MCP server transforms your AI assistant into a powerful development compani
 npm install
 ```
 
-3. Configure your MCP client (see Configuration section below)
+3. (Recommended) Link the server onto your `PATH` so MCP clients can launch it
+   by name, with no hardcoded path:
+
+```bash
+npm link
+which warden-mcp-server   # verify it resolves
+```
+
+   This exposes a `warden-mcp-server` command (declared by the package's `bin`
+   field). Nothing else to edit.
+
+4. Configure your MCP client (see Configuration section below)
 
 ## Configuration
 
 ### MCP Client Configuration
 
-Add the following configuration to your MCP client settings:
+There are two ways to point an MCP client at this server.
+
+#### Option A — PATH command (recommended, path-free)
+
+After `npm link` (see Installation), the server is available as the
+`warden-mcp-server` command. Reference it by name — no absolute path:
+
+```json
+{
+  "mcpServers": {
+    "warden": {
+      "command": "warden-mcp-server"
+    }
+  }
+}
+```
+
+Because there is no path and no environment-variable interpolation, the **same
+snippet works unchanged across Claude Code, Cursor, and Junie** (all read a
+`mcpServers` JSON block). For **Codex**, which uses TOML instead of JSON, add the
+equivalent stanza to `.codex/config.toml` (or `~/.codex/config.toml`):
+
+```toml
+[mcp_servers.warden]
+command = "warden-mcp-server"
+```
+
+This is the best choice for sharing one definition across multiple tools or a
+team — nothing machine-specific is committed. Tip: keep the JSON in one canonical
+file and symlink each tool's expected config path to it (`.mcp.json`,
+`.cursor/mcp.json`, `.junie/mcp/mcp.json`).
+
+#### Option B — absolute path
+
+If you prefer not to link the server globally, point directly at `server.js`:
 
 ```json
 {
@@ -46,7 +91,7 @@ Add the following configuration to your MCP client settings:
 }
 ```
 
-**Important**: Replace `/absolute/path/to/warden-mcp-server/server.js` with the actual absolute path to the server.js file on your system.
+**Important**: Replace `/absolute/path/to/warden-mcp-server/server.js` with the actual absolute path to the server.js file on your system. This path is machine-specific, so it cannot be shared across machines as-is.
 
 ### For Claude Desktop
 

@@ -4,6 +4,9 @@
   "description": "MCP Server for Warden + Magento 2 development workflow with project initialization",
   "main": "server.js",
   "type": "module",
+  "bin": {
+    "warden-mcp-server": "server.js"
+  },
   "scripts": {
     "start": "node server.js",
     "dev": "node --inspect server.js"
