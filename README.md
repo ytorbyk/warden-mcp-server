@@ -11,7 +11,9 @@ This MCP server transforms your AI assistant into a powerful development compani
 - **🗄️ Database Operations**: Execute SQL queries directly in containerized databases
 - **🐘 PHP Development Tools**: Run PHP scripts in properly configured containerized environments
 - **🛠️ Magento CLI Integration**: Execute Magento commands seamlessly within containers
+- **⚡ Laravel CLI Integration**: Run Artisan commands inside containers
 - **🧪 Unit Testing Support**: Run PHPUnit tests with automatic configuration detection
+- **🧪 Pest Testing Support**: Run Pest tests inside containers
 - **📦 Composer Integration**: Manage dependencies within containers with full command support
 - **📊 Environment Monitoring**: List and monitor running Warden environments
 
@@ -203,6 +205,22 @@ Executes SQL queries directly in the Warden database container.
 
 ---
 
+#### `warden_laravel_db_query`
+Executes SQL queries directly in the Laravel database container.
+
+**Parameters:**
+- `project_path` (required): Path to the project directory
+- `query` (required): SQL query to execute
+- `database` (optional): Database name (default: "laravel")
+
+**Use Cases:**
+- Execute database queries for Laravel apps
+- Retrieve data for analysis
+- Perform database maintenance tasks
+- Check database schema or data
+
+---
+
 ### PHP Development
 
 #### `warden_php_script`
@@ -240,6 +258,24 @@ Executes Magento CLI commands inside the php-fpm container.
 
 ---
 
+### Laravel CLI
+
+#### `warden_artisan_cli`
+Executes Artisan commands inside the php-fpm container.
+
+**Parameters:**
+- `project_path` (required): Path to the project directory
+- `command` (required): Artisan command (without 'artisan' prefix)
+- `args` (optional): Additional arguments for the command
+
+**Use Cases:**
+- Run migrations (migrate, migrate:fresh)
+- Manage cache (cache:clear, config:cache)
+- Run queues (queue:work)
+- Generate code (make:model, make:controller)
+
+---
+
 ### Testing
 
 #### `warden_run_unit_tests`
@@ -256,6 +292,21 @@ Runs PHPUnit tests inside the php-fpm container with automatic configuration det
 - Execute specific test suites
 - Run tests with custom configuration
 - Validate code changes with automated testing
+
+---
+
+#### `warden_run_pest_tests`
+Runs Pest tests inside the php-fpm container.
+
+**Parameters:**
+- `project_path` (required): Path to the project directory
+- `test_path` (optional): Path to specific test file or directory
+- `extra_args` (optional): Additional Pest arguments
+
+**Use Cases:**
+- Run test suites for Laravel apps
+- Execute specific tests
+- Run tests with custom arguments
 
 ---
 

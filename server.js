@@ -175,6 +175,83 @@ class WardenMagentoServer {
             },
           },
           {
+            name: "warden_artisan_cli",
+            description: "Run artisan command inside the php-fpm container",
+            inputSchema: {
+              type: "object",
+              properties: {
+                project_path: {
+                  type: "string",
+                  description: "Path to the project directory",
+                },
+                command: {
+                  type: "string",
+                  description: "Artisan command (without 'artisan' prefix)",
+                },
+                args: {
+                  type: "array",
+                  description: "Additional arguments for the command",
+                  items: {
+                    type: "string",
+                  },
+                  default: [],
+                },
+              },
+              required: ["project_path", "command"],
+            },
+          },
+          {
+            name: "warden_run_pest_tests",
+            description: "Run Pest tests inside the php-fpm container",
+            inputSchema: {
+              type: "object",
+              properties: {
+                project_path: {
+                  type: "string",
+                  description: "Path to the project directory",
+                },
+                test_path: {
+                  type: "string",
+                  description:
+                    "Optional path to specific test file or directory",
+                  default: "",
+                },
+                extra_args: {
+                  type: "array",
+                  description: "Additional Pest arguments",
+                  items: {
+                    type: "string",
+                  },
+                  default: [],
+                },
+              },
+              required: ["project_path"],
+            },
+          },
+          {
+            name: "warden_laravel_db_query",
+            description: "Run a SQL query in the Laravel database",
+            inputSchema: {
+              type: "object",
+              properties: {
+                project_path: {
+                  type: "string",
+                  description: "Path to the project directory",
+                },
+                query: {
+                  type: "string",
+                  description: "SQL query to execute",
+                },
+                database: {
+                  type: "string",
+                  description: "Database name (optional, defaults to laravel)",
+                  default: "laravel",
+                },
+              },
+              required: ["project_path", "query"],
+            },
+          },
+          {
             name: "warden_run_unit_tests",
             description:
               "Run unit tests using PHPUnit in the php-fpm container",
@@ -334,6 +411,12 @@ class WardenMagentoServer {
           return await this.runPhpScript(request.params.arguments);
         case "warden_magento_cli":
           return await this.runMagentoCli(request.params.arguments);
+        case "warden_artisan_cli":
+          return await this.runArtisanCli(request.params.arguments);
+        case "warden_run_pest_tests":
+          return await this.runPestTests(request.params.arguments);
+        case "warden_laravel_db_query":
+          return await this.runLaravelDbQuery(request.params.arguments);
         case "warden_run_unit_tests":
           return await this.runUnitTests(request.params.arguments);
         case "warden_composer":
@@ -606,6 +689,112 @@ class WardenMagentoServer {
       project_path,
       wardenCommand,
       `Running Magento CLI: bin/magento ${command}`,
+    );
+  }
+
+  async runArtisanCli(args) {
+    const { project_path, command, args: commandArgs = [] } = args;
+
+    const wardenCommand = [
+      "env",
+      "exec",
+      "-T",
+      "php-fpm",
+      "php",
+      "artisan",
+      command,
+      ...commandArgs,
+    ];
+
+    return await this.executeWardenCommand(
+      project_path,
+      wardenCommand,
+      `Running Artisan CLI: artisan ${command}`,
+    );
+  }
+
+  async runPestTests(args) {
+    const { project_path, test_path = "", extra_args = [] } = args;
+
+    const wardenCommand = [
+      "env",
+      "exec",
+      "-T",
+      "php-fpm",
+      "php",
+      "vendor/bin/pest",
+    ];
+
+    if (test_path && test_path.trim() !== "") {
+      wardenCommand.push(test_path);
+    }
+
+    wardenCommand.push(...extra_args);
+
+    const commandStr = `warden ${wardenCommand.join(" ")}`;
+    const normalizedProjectPath = project_path.replace(/\/+$/, "");
+    const absoluteProjectPath = resolve(normalizedProjectPath);
+
+    const debugInfo = `
+Debug Information:
+- Project Path: ${absoluteProjectPath}
+- Test Path: ${test_path || "(all tests)"}
+- Extra Args: ${extra_args.length > 0 ? extra_args.join(" ") : "(none)"}
+- Full Command: ${commandStr}
+`;
+
+    try {
+      const result = await this.executeCommand(
+        "warden",
+        wardenCommand,
+        absoluteProjectPath,
+      );
+
+      const isSuccess = result.code === 0;
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Running Pest tests ${isSuccess ? "completed successfully" : "failed"}!\n${debugInfo}\nExit Code: ${result.code}\n\nOutput:\n${result.stdout || "(no output)"}\n\nErrors:\n${result.stderr || "(no errors)"}`,
+          },
+        ],
+        isError: !isSuccess,
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Failed to execute Pest tests:\n${debugInfo}\nError: ${error.message}\n\nOutput:\n${error.stdout || "(no output)"}\n\nErrors:\n${error.stderr || "(no errors)"}`,
+          },
+        ],
+        isError: true,
+      };
+    }
+  }
+
+  async runLaravelDbQuery(args) {
+    const { project_path, query, database = "laravel" } = args;
+
+    const wardenCommand = [
+      "env",
+      "exec",
+      "-T",
+      "db",
+      "mysql",
+      "-u",
+      "root",
+      "-plaravel",
+      database,
+      "-e",
+      query,
+    ];
+
+    return await this.executeWardenCommand(
+      project_path,
+      wardenCommand,
+      `Running Laravel database query in ${database}`,
     );
   }
 
