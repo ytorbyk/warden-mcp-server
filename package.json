@@ -5,7 +5,7 @@
   "main": "server.js",
   "type": "module",
   "bin": {
-    "warden-mcp-server": "server.js"
+    "mcp-warden-server": "server.js"
   },
   "scripts": {
     "start": "node server.js",

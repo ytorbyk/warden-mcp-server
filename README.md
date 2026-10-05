@@ -31,10 +31,10 @@ npm install
 
 ```bash
 npm link
-which warden-mcp-server   # verify it resolves
+which mcp-warden-server   # verify it resolves
 ```
 
-   This exposes a `warden-mcp-server` command (declared by the package's `bin`
+   This exposes a `mcp-warden-server` command (declared by the package's `bin`
    field). Nothing else to edit.
 
 4. Configure your MCP client (see Configuration section below)
@@ -48,13 +48,13 @@ There are two ways to point an MCP client at this server.
 #### Option A — PATH command (recommended, path-free)
 
 After `npm link` (see Installation), the server is available as the
-`warden-mcp-server` command. Reference it by name — no absolute path:
+`mcp-warden-server` command. Reference it by name — no absolute path:
 
 ```json
 {
   "mcpServers": {
     "warden": {
-      "command": "warden-mcp-server"
+      "command": "mcp-warden-server"
     }
   }
 }
@@ -67,7 +67,7 @@ equivalent stanza to `.codex/config.toml` (or `~/.codex/config.toml`):
 
 ```toml
 [mcp_servers.warden]
-command = "warden-mcp-server"
+command = "mcp-warden-server"
 ```
 
 This is the best choice for sharing one definition across multiple tools or a
